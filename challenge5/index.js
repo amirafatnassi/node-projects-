@@ -1,5 +1,5 @@
 const express = require("express");
-const cors=require('morgan');
+const cors=require('cors');
 const morgan=require('morgan')
 const bodyParser=require('body-parser');
 
@@ -13,8 +13,6 @@ app.use(express.json());
 app.use(bodyParser.json({
     limit: 1024*1024*10
 }));
-
-
 
 const api=require('./Routes/api');
 app.use('/upload',api);
