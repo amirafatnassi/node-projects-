@@ -8,6 +8,7 @@ const {
   affectTodoToUser,
   deleteTodoFromUser,
 } = require("../Controllers/userController");
+
 const router = express.Router();
 
 router.get("/users", getAll);

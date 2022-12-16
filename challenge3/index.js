@@ -4,12 +4,11 @@ var cors = require('cors')
 var morgan = require('morgan')
 const port = 4000
 
-
 require("./database/connect");
 
 const app = express();
 app.use(cors())
-morgan('tiny')
+app.use(morgan('tiny'));
 app.use(bodyParser.json());
 
 app.use("/api", require("./routes/users"));
