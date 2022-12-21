@@ -1,6 +1,7 @@
 const users = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const userCount = require("../models/userCount");
 
 exports.register = async (req, res) => {
   try {
@@ -13,6 +14,7 @@ exports.register = async (req, res) => {
       const hash = bcrypt.hashSync(req.body.password, salt);
       req.body.password = hash;
       users.create(req.body);
+      await userCount.findByIdAndUpdate('63a31c161c39a8226fe31c91',{$inc:{users:1}},{new:true});
       res.status(201).send({ message: "user created successfully !" });
     }
   } catch (error) {
@@ -47,7 +49,7 @@ exports.updateUser = async (req, res) => {
   try {
     const result = await users.findById(req.params.id);
     if (result) {
-      await users.findByIdAndUpdate(req.params.id, req.body); 
+      await users.findByIdAndUpdate(req.params.id, req.body);
       const updatedUser = await users.findById(req.params.id);
       res.status(200).send(updatedUser);
     } else {

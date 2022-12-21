@@ -3,6 +3,7 @@ const fs = require("fs");
 const ejs = require("ejs");
 const condidatures = require("../models/condidature");
 const cvs = require("../models/cv");
+const offres=require('../models/offreTravail');
 
 exports.getcondidatures = async (req, res) => {
   try {
@@ -30,18 +31,40 @@ exports.postuler = async (req, res) => {
   try {
     const condidature = await condidatures.create(req.body);
     
-    const _cv = await cvs.findById(req.body.cv).populate('competences');
-    const _offre = await cvs.findById(req.body.offreTravail);
+    const _cv = await cvs.findById(req.body.cv).populate('competences').populate('formations').populate('interets').populate('langues').populate('experiences');
+    const _offre = await offres.findById(req.body.offreTravail);
     const html = fs.readFileSync("Views/resume.html", "utf-8");
-    let tab = '';
+    let tab_competences = '';
+    let tab_formations = '';
+    let tab_interets = '';
+    let tab_langues = '';
+    let tab_experiences = '';
     _cv.competences.map((e)=>{
-      return tab+=`
-      <html>
-       ${e.competence},
-       niveau: ${e.niveau},</html> `
+      return tab_competences+= 
+      ` ${e.competence} ,
+       niveau: ${e.niveau} `
     });
       
-        
+    _cv.formations.map((e)=>{
+      let newDebutDateFormat = e.dateDebut.getDate()+'/'+(e.dateDebut.getMonth()+1)+'/'+e.dateDebut.getFullYear();
+      let newFinDateFormat = e.dateFin.getDate()+'/'+(e.dateFin.getMonth()+1)+'/'+e.dateFin.getFullYear();
+      return  tab_formations+=` ${e.formation}: ${e.description}, ${newDebutDateFormat} à ${newFinDateFormat} `
+    });
+
+    _cv.experiences.map((e)=>{
+      let newDebutDateFormat = e.dateDebut.getDate()+'/'+(e.dateDebut.getMonth()+1)+'/'+e.dateDebut.getFullYear();
+      let newFinDateFormat = e.dateFin.getDate()+'/'+(e.dateFin.getMonth()+1)+'/'+e.dateFin.getFullYear();
+      return tab_experiences+=` ${e.poste} , ${e.description},  ${newDebutDateFormat} , ${newFinDateFormat} `
+    });
+
+    _cv.interets.map((i)=>{
+      return tab_interets+=` ${i.interet} `
+    });
+
+    _cv.langues.map((e)=>{
+      return tab_langues+=` ${e.langue}, niveau: ${e.niveau} `
+    });
+
       
     const render = ejs.render(html, {
       fullname: _cv.prenom + " " + _cv.nom,
@@ -49,7 +72,11 @@ exports.postuler = async (req, res) => {
       email:_cv.email,
       tel:_cv.tel,
       profile: _cv.profile,
-      competences:tab
+      competences:tab_competences,
+      interets:tab_interets,
+      langues:tab_langues,
+      formations:tab_formations,
+      experiences:tab_experiences
      
     });
 
@@ -64,9 +91,9 @@ exports.postuler = async (req, res) => {
     });
 
     let info = await transporter.sendMail({
-      from: req.body.email,
+      from: _cv.email,
       to: process.env.EMAIL,
-      subject: req.body.email + ":" + req.body.subject,
+      subject: 'Condidature pour:' + _offre.jobTitle,
       html: render
     });
     res.status(200).send(condidature);

@@ -22,6 +22,7 @@ app.use('/interet', require('./Routes/interet'));
 app.use('/cv', require('./Routes/cv'));
 app.use('/offreTravail', require('./Routes/offreTravail'));
 app.use('/condidature', require('./Routes/condidature'));
+app.use('/userCount',require('./Routes/userCount'));
 
 app.listen(port, function () { 
   console.log("app working on port:", port);
