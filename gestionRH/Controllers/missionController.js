@@ -56,12 +56,12 @@ exports.deleteMission = async (req, res) => {
 
 exports.affectEmployeeToMission = async (req, res) => {
   try {
-    const _employee = await employees.findById(req.params.idEmployee);
+    const _employee = await employees.findById(req.params.idEmployee)
     if (_employee.disponibilite == true) {
       await missions.findByIdAndUpdate(req.params.idMission, {
         $push: { equipe: req.params.idEmployee },
       });
-      const updatedMission = await missions.findById(req.params.idMission);
+      const updatedMission = await missions.findById(req.params.idMission).populate("equipe");
       const _employee = await employees.findByIdAndUpdate(
         req.params.idEmployee,
         {
@@ -72,7 +72,12 @@ exports.affectEmployeeToMission = async (req, res) => {
       const html = fs.readFileSync("Views/email.html", "utf-8");
       const render = ejs.render(html, {
         employeeFullname: _employee.prenom + " " + _employee.nom,
-        mission:updatedMission._id
+        mission:updatedMission._id,
+        tache:updatedMission.tache,
+        description:updatedMission.description,
+        dateDebut:updatedMission.dateDebut,
+        dateFin:updatedMission.dateFin,
+        equipe:updatedMission.equipe
       });
 
       let transporter = nodemailer.createTransport({
@@ -90,6 +95,7 @@ exports.affectEmployeeToMission = async (req, res) => {
         to: process.env.EMAIL,
         subject: req.body.email + ":" + req.body.subject,
         html: render,
+        //html:``
       });
 
       res.status(200).send(updatedMission);
