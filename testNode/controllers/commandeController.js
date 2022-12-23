@@ -101,27 +101,18 @@ exports.addProduitToCart = async (req, res) => {
 
 exports.retirerProduitFromCart = async (req, res) => {
   try {
-    const _commande = await commandes.findById(req.params.commandeId); 
+    const _commande = await commandes.findById(req.params.commandeId).populate('liste_produits'); 
     if ((_commande.liste_produits.length==0)) {
       res.send({ message: "liste de produits vide !" });
     } else {
-      //si produit existe traitement sinon produit n'existe pas
-
-     const liste_produits = await _commande.liste_produits;
-     const result=liste_produits.findOne(req.params.produitId);
-     res.send(result);
-
-
-      // await commandes.findByIdAndUpdate(req.params.commandeId, {
-      //   $pull: { liste_produits: req.params.produitId },
-      // });
-      // await produits.findByIdAndUpdate(req.params.produitId, {
-      //   $inc: { quantite: 1 },
-      // });
-      // const updatedCommande = await commandes.findById(req.params.commandeId);
-      // res.status(200).send(updatedCommande);
-
-
+      await commandes.findByIdAndUpdate(req.params.commandeId, {
+        $pull: { liste_produits: req.params.produitId },
+      });
+      await produits.findByIdAndUpdate(req.params.produitId, {
+        $inc: { quantite: 1 },
+      });
+      const updatedCommande = await commandes.findById(req.params.commandeId);
+      res.status(200).send(updatedCommande);
     }
   } catch (error) {
     res.status(500).send({ message: error.message || "erreur serveur !" });

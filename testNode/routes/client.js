@@ -9,7 +9,7 @@ const {
 } = require("../controllers/clientController");
 const router = express.Router();
 
-router.get("/getClients",getClients);
+router.get("/getClients",passport.authenticate('bearer',getClients),getClients);
 router.get("/login", login);
 router.post("/register", register);
 router.put("/updateClient/:id",passport.authenticate('bearer',{session:false}), updateClient);

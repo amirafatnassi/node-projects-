@@ -25,7 +25,7 @@ exports.getProduit = async (req, res) => {
 exports.addProduit = async (req, res) => {
   try {
     const produit = await produits.create(req.body);
-    res.status(200).send(produit);
+    res.status(200).send({message: "created successfully !" });
   } catch (error) {
     res.status(500).send({ message: error.message || "erreur serveur" });
   }
@@ -44,7 +44,7 @@ exports.updateProduit = async (req, res) => {
 exports.deleteProduit = async (req, res) => {
   try {
     const deletedProduit = await produits.findByIdAndDelete(req.params.id);
-    res.status(200).send(deletedProduit);
+    res.status(200).send({message:"deleted successfully !"});
   } catch (error) {
     res.status(500).send({ message: error.message || "erreur serveur" });
   }
